@@ -8,7 +8,7 @@ import com.sharedaka.utils.StringUtil;
 
 public class ApiModelPropertyProcessor {
 
-    private static String API_MODEL_PROPERTY_FORMAT = "@ApiModelProperty(value = \"%s\", required = %s";
+    private static String API_MODEL_PROPERTY_FORMAT = "@ApiModelProperty(value = \"%s\"";
 
     public static ApiModelPropertyEntity createByPsiField(PsiField psiField) {
         ApiModelPropertyEntity apiModelProperty = new ApiModelPropertyEntity();
@@ -23,7 +23,6 @@ public class ApiModelPropertyProcessor {
             apiModelProperty.setValue("");
         }
 
-        apiModelProperty.setRequired(true);
         return apiModelProperty;
     }
 
@@ -68,7 +67,7 @@ public class ApiModelPropertyProcessor {
 
     public static String createAnnotationString(ApiModelPropertyEntity apiEntity) {
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format(API_MODEL_PROPERTY_FORMAT, apiEntity.getValue(), apiEntity.getRequired()));
+        sb.append(String.format(API_MODEL_PROPERTY_FORMAT, apiEntity.getValue()));
         if (apiEntity.getName() != null) {
             sb.append(String.format(",name = \"%s\"", apiEntity.getName()));
         }
