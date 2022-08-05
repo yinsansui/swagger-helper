@@ -34,5 +34,5 @@ runIde {
 patchPluginXml {
     pluginXmlFiles "plugin.xml"
     sinceBuild "193"
-    untilBuild "211.*"
+    untilBuild "221.*"
 }
