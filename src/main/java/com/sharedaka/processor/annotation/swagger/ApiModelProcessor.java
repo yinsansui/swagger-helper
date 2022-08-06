@@ -4,6 +4,7 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.javadoc.PsiDocComment;
 import com.sharedaka.entity.annotation.swagger.ApiModelEntity;
+import com.sharedaka.processor.ProcessorHelper;
 import com.sharedaka.utils.StringUtil;
 
 import java.util.Arrays;
@@ -15,18 +16,8 @@ public class ApiModelProcessor {
 
     public static ApiModelEntity createByPsiClass(PsiClass psiClass) {
         ApiModelEntity apiModel = new ApiModelEntity();
-        PsiDocComment psiDocDocument = psiClass.getDocComment();
-        if (psiDocDocument != null) {
-            StringBuilder sb = new StringBuilder();
-            for (PsiElement psiElement : psiDocDocument.getDescriptionElements()) {
-                sb.append(psiElement.getText());
-            }
-            apiModel.setDescription(StringUtil.removeSpace(sb.toString()));
-        } else {
-            apiModel.setDescription("");
-        }
-
         apiModel.setValue(psiClass.getName());
+        apiModel.setDescription(ProcessorHelper.getDescription(psiClass));
         return apiModel;
     }
 

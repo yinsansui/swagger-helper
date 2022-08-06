@@ -1,7 +1,11 @@
 package com.sharedaka.processor.annotation.swagger;
 
 import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.javadoc.PsiDocComment;
 import com.sharedaka.entity.annotation.swagger.ApiEntity;
+import com.sharedaka.processor.ProcessorHelper;
+import com.sharedaka.utils.StringUtil;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -12,8 +16,8 @@ public class ApiProcessor {
 
     public static ApiEntity createByPsiClass(PsiClass psiClass) {
         ApiEntity apiEntity = new ApiEntity();
-        apiEntity.setValue("");
-        apiEntity.setDescription("");
+        apiEntity.setValue(psiClass.getName());
+        apiEntity.setDescription(ProcessorHelper.getDescription(psiClass));
         return apiEntity;
     }
 

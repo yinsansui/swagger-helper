@@ -10,6 +10,7 @@ import com.sharedaka.entity.annotation.swagger.ApiImplicitParamsEntity;
 import com.sharedaka.entity.annotation.swagger.ApiOperationEntity;
 import com.sharedaka.parser.CodeExceptionParser;
 import com.sharedaka.parser.ParserHolder;
+import com.sharedaka.processor.ProcessorHelper;
 import com.sharedaka.utils.BasicTypeUtil;
 import com.sharedaka.utils.PsiAnnotationUtil;
 import com.sharedaka.utils.PsiElementUtil;
@@ -66,7 +67,8 @@ public class SwaggerApiMethodProcessor implements MethodSupportable {
         PsiElementFactory elementFactory = JavaPsiFacade.getElementFactory(psiMethod.getProject());
         processApiOperation(elementFactory, psiMethod);
         processApiImplicitParams(elementFactory, psiMethod);
-        processApiResponses(elementFactory, psiMethod);
+        // 基于 ABC 定制，直接屏蔽 ApiResponse 的生成
+//        processApiResponses(elementFactory, psiMethod);
     }
 
     private void processApiResponses(PsiElementFactory elementFactory, PsiMethod psiMethod) {
@@ -93,7 +95,7 @@ public class SwaggerApiMethodProcessor implements MethodSupportable {
         PsiAnnotation apiImplicitParam = psiMethod.getModifierList().findAnnotation(SWAGGER_IMPLICIT_PARAM_ANNOTATION_NAME);
         Map<String, ApiImplicitParamEntity> existedApiImplicitParams = readAlreadyExistsAnnotation(apiImplicitParams, apiImplicitParam);
         PsiParameter[] psiParameters = psiMethod.getParameterList().getParameters();
-        Map<String, ApiImplicitParamEntity> generatedImplicitParams = processMethodParam(psiMethod.getProject(), psiParameters);
+        Map<String, ApiImplicitParamEntity> generatedImplicitParams = processMethodParam(psiMethod.getProject(), psiMethod, psiParameters);
         mergeImplicitParams(existedApiImplicitParams, generatedImplicitParams);
         writeApiImplicitParamsToFile(generatedImplicitParams, psiElementFactory, psiMethod);
         PsiElementUtil.importPackage(psiElementFactory, psiMethod.getContainingFile(), psiMethod.getProject(), "ApiImplicitParam");
@@ -259,7 +261,8 @@ public class SwaggerApiMethodProcessor implements MethodSupportable {
     }
 
     // 需要重构
-    private Map<String, ApiImplicitParamEntity> processMethodParam(Project project, PsiParameter[] psiParameters) {
+    private Map<String, ApiImplicitParamEntity> processMethodParam(Project project, PsiMethod psiMethod, PsiParameter[] psiParameters) {
+        Map<String, String> paramValueToParamData = ProcessorHelper.parseMethodParamTags(psiMethod);
         Map<String, ApiImplicitParamEntity> apiImplicitParamEntityMap = new LinkedHashMap<>();
         for (PsiParameter psiParameter : psiParameters) {
             PsiType psiType = psiParameter.getType();
@@ -271,7 +274,7 @@ public class SwaggerApiMethodProcessor implements MethodSupportable {
             }
             String paramType = "query";
             String defaultValue = null;
-            String value = "";
+            String value = paramValueToParamData.getOrDefault(name, "");
             boolean required = true;
             if (Objects.equals(dataType, "file")) {
                 paramType = "form";
