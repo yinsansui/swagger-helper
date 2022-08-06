@@ -156,10 +156,8 @@ public class SwaggerApiMethodProcessor implements MethodSupportable {
 
     private String createApiOperationStr(ApiOperationEntity apiOperationEntity) {
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format(API_OPERATION_FORMAT, apiOperationEntity.getValue()));
-        if (apiOperationEntity.getConsumes() != null) {
-            sb.append(String.format(", consumes= \"%s\" ", apiOperationEntity.getConsumes()));
-        }
+        sb.append(String.format("@ApiOperation(value = \"%s\"", apiOperationEntity.getValue()));
+        Optional.ofNullable(apiOperationEntity.getNotes()).ifPresent(notes -> sb.append(String.format(", notes = \"%s\" ", notes)));
         if (apiOperationEntity.getTags() != null) {
             String[] tags = new String[apiOperationEntity.getTags().length];
             for (int i = 0; i < tags.length; i++) {
@@ -167,6 +165,9 @@ public class SwaggerApiMethodProcessor implements MethodSupportable {
             }
             sb.append(Arrays.stream(tags).collect(Collectors.joining(",", ",tags = {", "}")));
         }
+        Optional.ofNullable(apiOperationEntity.getHttpMethod()).ifPresent(httpMethod -> sb.append(String.format(", httpMethod = \"%s\" ", httpMethod)));
+        Optional.ofNullable(apiOperationEntity.getConsumes()).ifPresent(consumes -> sb.append(String.format(", consumes = \"%s\" ", consumes)));
+
         return sb.toString();
     }
 
