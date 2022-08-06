@@ -17,7 +17,7 @@ public class ApiModelProcessor {
     public static ApiModelEntity createByPsiClass(PsiClass psiClass) {
         ApiModelEntity apiModel = new ApiModelEntity();
         apiModel.setValue(psiClass.getName());
-        apiModel.setDescription(ProcessorHelper.getDescription(psiClass));
+        apiModel.setDescription(ProcessorHelper.getDescription(psiClass.getDocComment()));
         return apiModel;
     }
 

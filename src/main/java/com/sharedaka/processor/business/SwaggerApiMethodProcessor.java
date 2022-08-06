@@ -29,7 +29,7 @@ public class SwaggerApiMethodProcessor implements MethodSupportable {
 
     private final Set<String> interestingAnnotation;
 
-    private final String API_OPERATION_FORMAT = "@ApiOperation(value = \"%s\", notes = \"%s\",httpMethod = \"%s\"";
+    private final String API_OPERATION_FORMAT = "@ApiOperation(value = \"%s\"";
 
     private final String API_RESPONSE_FORMAT = "@ApiResponse(code = %d, message = \"%s\")";
 
@@ -156,7 +156,7 @@ public class SwaggerApiMethodProcessor implements MethodSupportable {
 
     private String createApiOperationStr(ApiOperationEntity apiOperationEntity) {
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format(API_OPERATION_FORMAT, apiOperationEntity.getValue(), apiOperationEntity.getNotes(), apiOperationEntity.getHttpMethod()));
+        sb.append(String.format(API_OPERATION_FORMAT, apiOperationEntity.getValue()));
         if (apiOperationEntity.getConsumes() != null) {
             sb.append(String.format(", consumes= \"%s\" ", apiOperationEntity.getConsumes()));
         }
@@ -196,12 +196,13 @@ public class SwaggerApiMethodProcessor implements MethodSupportable {
         ApiOperationEntity apiOperationEntity = new ApiOperationEntity();
         String returnTypeName = psiMethod.getReturnType().getCanonicalText() + ".class";
         apiOperationEntity.setResponse(returnTypeName);
-        PsiAnnotation[] annotations = psiMethod.getModifierList().getAnnotations();
-        PsiAnnotation springMvcMappingAnnotation = chooseSpringMvcMappingAnnotation(annotations);
-        String httpMethod = getHttpMethod(springMvcMappingAnnotation);
-        apiOperationEntity.setHttpMethod(httpMethod);
-        apiOperationEntity.setNotes("");
-        apiOperationEntity.setValue("");
+        // ABC 定制忽略 HttpMethod 和 Notes
+//        PsiAnnotation[] annotations = psiMethod.getModifierList().getAnnotations();
+//        PsiAnnotation springMvcMappingAnnotation = chooseSpringMvcMappingAnnotation(annotations);
+//        String httpMethod = getHttpMethod(springMvcMappingAnnotation);
+//        apiOperationEntity.setHttpMethod(httpMethod);
+//        apiOperationEntity.setNotes("");
+        apiOperationEntity.setValue(ProcessorHelper.getDescription(psiMethod.getDocComment()));
         return apiOperationEntity;
     }
 

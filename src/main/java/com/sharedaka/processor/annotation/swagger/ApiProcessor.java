@@ -17,7 +17,7 @@ public class ApiProcessor {
     public static ApiEntity createByPsiClass(PsiClass psiClass) {
         ApiEntity apiEntity = new ApiEntity();
         apiEntity.setValue(psiClass.getName());
-        apiEntity.setDescription(ProcessorHelper.getDescription(psiClass));
+        apiEntity.setDescription(ProcessorHelper.getDescription(psiClass.getDocComment()));
         return apiEntity;
     }
 

@@ -23,20 +23,16 @@ import java.util.Optional;
 public class ProcessorHelper {
 
     /**
-     * 传递 PisClass 得到类的描述信息
+     * 传递 PisClass 得到描述信息
      *
-     * @param psiClass PisClass
+     * @param psiDocDocument PisClass
      * @return 类的描述信息
      */
-    public static String getDescription(PsiClass psiClass) {
-        if (psiClass == null) {
+    public static String getDescription(PsiDocComment psiDocDocument) {
+        if (psiDocDocument == null) {
             return "";
         }
-        PsiDocComment psiDocDocument = psiClass.getDocComment();
-        if (psiDocDocument != null) {
-            return joinPsiElements(psiDocDocument.getDescriptionElements());
-        }
-        return "";
+        return joinPsiElements(psiDocDocument.getDescriptionElements());
     }
 
     /**
