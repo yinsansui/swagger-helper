@@ -281,7 +281,12 @@ public class SwaggerApiMethodProcessor implements MethodSupportable {
             if (Objects.equals(dataType, "file")) {
                 paramType = "form";
             }
-            for (PsiAnnotation psiAnnotation : psiParameter.getAnnotations()) {
+            PsiAnnotation[] annotations = psiParameter.getAnnotations();
+            // ABC 定义，Header 头中的参数不用用户主动传递
+            if (Arrays.stream(annotations).anyMatch(annotation -> REQUEST_HEADER_ANNOTATION_NAME.equals(annotation.getQualifiedName()))) {
+                continue;
+            }
+            for (PsiAnnotation psiAnnotation : annotations) {
                 if (StringUtils.isEmpty(psiAnnotation.getQualifiedName())) {
                     break;
                 }
