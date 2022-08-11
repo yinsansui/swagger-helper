@@ -2,20 +2,18 @@ package com.sharedaka.dispatcher;
 
 public class DispatcherHolder {
 
-    private static SwaggerActionDispatcher swaggerActionDispatcher;
+    private volatile static SwaggerActionDispatcher swaggerActionDispatcher;
 
-    private static String swaggerActionDispatcherLock = "";
+    private static final Object LOCK = new Object();
 
     public static SwaggerActionDispatcher getSwaggerApiControllerProcessor() {
-        if (swaggerActionDispatcher != null) {
-            return swaggerActionDispatcher;
-        } else {
-            synchronized (swaggerActionDispatcherLock) {
+        if (swaggerActionDispatcher == null) {
+            synchronized (LOCK) {
                 if (swaggerActionDispatcher == null) {
                     swaggerActionDispatcher = new SwaggerActionDispatcher();
                 }
             }
-            return swaggerActionDispatcher;
         }
+        return swaggerActionDispatcher;
     }
 }

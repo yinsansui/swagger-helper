@@ -1,5 +1,8 @@
 package com.sharedaka.constant.spring;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class SpringMvcAnnotations {
 
     public static final String REQUEST_HEADER_ANNOTATION_NAME = "org.springframework.web.bind.annotation.RequestHeader";
@@ -22,4 +25,5 @@ public class SpringMvcAnnotations {
     public static final String REPOSITORY_ANNOTATION_NAME = "org.springframework.stereotype.Repository";
     public static final String CONFIGURATION_ANNOTATION_NAME = "org.springframework.context.annotation.Configuration";
 
+    public static final List<String> WITH_COMPONENT_ANNOTATIONS = Arrays.asList(CONTROLLER_ANNOTATION_NAME, REST_CONTROLLER_ANNOTATION_NAME, SERVICE_ANNOTATION_NAME, COMPONENT_ANNOTATION_NAME, REPOSITORY_ANNOTATION_NAME, CONFIGURATION_ANNOTATION_NAME);
 }

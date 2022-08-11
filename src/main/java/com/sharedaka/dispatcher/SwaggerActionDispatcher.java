@@ -1,6 +1,7 @@
 package com.sharedaka.dispatcher;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Editor;
@@ -24,80 +25,51 @@ import com.sharedaka.utils.PsiElementUtil;
 public class SwaggerActionDispatcher {
 
     public boolean support(AnActionEvent actionEvent) {
-        if (actionEvent == null) {
+        Editor editor = actionEvent.getData(CommonDataKeys.EDITOR);
+        PsiFile psiFile = actionEvent.getData(CommonDataKeys.PSI_FILE);
+        if (editor == null || psiFile == null) {
             return false;
         }
-        Project project = actionEvent.getProject();
-        if (project != null) {
-            Editor editor = actionEvent.getData(PlatformDataKeys.EDITOR);
-            if (editor != null) {
-                PsiFile psiFile = PsiUtilBase.getPsiFileInEditor(editor, project);
-                if (psiFile instanceof PsiJavaFile) {
-                    int startOffset = editor.getSelectionModel().getSelectionStart();
-                    PsiElement selectedElement = PsiUtilBase.getElementAtOffset(psiFile, startOffset);
 
-                    if (selectedElement instanceof PsiMethod || PsiElementUtil.getPsiMethod(selectedElement) != null) {
-                        PsiMethod psiMethod = null;
-                        if (selectedElement instanceof PsiMethod) {
-                            psiMethod = (PsiMethod) selectedElement;
-                        } else {
-                            psiMethod = PsiElementUtil.getPsiMethod(selectedElement);
-                        }
-                        return ProcessorHolder.getSwaggerApiMethodProcessor().support(PsiElementUtil.getPsiCLass(psiMethod), psiMethod);
-                    } else if (selectedElement instanceof PsiClass || PsiElementUtil.getPsiCLass(selectedElement) != null) {
-                        PsiClass psiClass = null;
-                        if (selectedElement instanceof PsiClass) {
-                            psiClass = (PsiClass) selectedElement;
-                        } else {
-                            psiClass = PsiElementUtil.getPsiCLass(selectedElement);
-                        }
-                        return ProcessorHolder.getSwaggerApiControllerProcessor().support(psiClass) || ProcessorHolder.getSwaggerApiModelProcessor().support(psiClass);
-                    }
-                }
-            }
+        int startOffset = editor.getSelectionModel().getSelectionStart();
+        PsiElement selectedElement = PsiUtilBase.getElementAtOffset(psiFile, startOffset);
+
+        PsiMethod psiMethod = null;
+        PsiClass psiClass = null;
+        if ((psiMethod = PsiElementUtil.lookupPsiMethod(selectedElement)) != null) {
+            return ProcessorHolder.getSwaggerApiMethodProcessor().support(PsiElementUtil.lookupPsiClass(psiMethod), psiMethod);
+        } else if ((psiClass = PsiElementUtil.lookupPsiClass(selectedElement)) != null) {
+            return ProcessorHolder.getSwaggerApiControllerProcessor().support(psiClass) || ProcessorHolder.getSwaggerApiModelProcessor().support(psiClass);
         }
+
         return false;
     }
 
     public void dispatcher(AnActionEvent actionEvent) {
-        Project project = actionEvent.getProject();
-        if (project != null) {
-            Editor editor = actionEvent.getData(PlatformDataKeys.EDITOR);
-            if (editor != null) {
-                PsiFile psiFile = PsiUtilBase.getPsiFileInEditor(editor, project);
-                // todo 细化选择控制
-                if (psiFile != null) {
-                    doDispatcher(psiFile, editor);
-                }
-            }
+        Editor editor = actionEvent.getData(CommonDataKeys.EDITOR);
+        PsiFile psiFile = actionEvent.getData(CommonDataKeys.PSI_FILE);
+        if (editor == null || psiFile == null) {
+            return;
         }
+
+        // todo 细化选择控制
+        doDispatcher(psiFile, editor);
     }
 
     private void doDispatcher(PsiFile psiFile, Editor editor) {
         int startOffset = editor.getSelectionModel().getSelectionStart();
         PsiElement selectedElement = PsiUtilBase.getElementAtOffset(psiFile, startOffset);
 
-        if (selectedElement instanceof PsiMethod || PsiElementUtil.getPsiMethod(selectedElement) != null) {
-            PsiMethod psiMethod = null;
-            if (selectedElement instanceof PsiMethod) {
-                psiMethod = (PsiMethod) selectedElement;
-            } else {
-                psiMethod = PsiElementUtil.getPsiMethod(selectedElement);
-            }
-            PsiMethod finalPsiMethod = psiMethod;
+        PsiClass psiClass = null;
+        PsiMethod psiMethod = PsiElementUtil.lookupPsiMethod(selectedElement);
+        if (psiMethod != null) {
             WriteCommandAction.runWriteCommandAction(psiFile.getProject(), () -> {
                 SwaggerApiMethodProcessor swaggerApiMethodProcessor = ProcessorHolder.getSwaggerApiMethodProcessor();
-                if (swaggerApiMethodProcessor.support(PsiElementUtil.getPsiCLass(finalPsiMethod), finalPsiMethod)) {
-                    swaggerApiMethodProcessor.process(finalPsiMethod);
+                if (swaggerApiMethodProcessor.support(PsiElementUtil.lookupPsiClass(psiMethod), psiMethod)) {
+                    swaggerApiMethodProcessor.process(psiMethod);
                 }
             });
-        } else if (selectedElement instanceof PsiClass || PsiElementUtil.getPsiCLass(selectedElement) != null) {
-            PsiClass psiClass = null;
-            if (selectedElement instanceof PsiClass) {
-                psiClass = (PsiClass) selectedElement;
-            } else {
-                psiClass = PsiElementUtil.getPsiCLass(selectedElement);
-            }
+        } else if ((psiClass = PsiElementUtil.lookupPsiClass(selectedElement)) != null) {
             PsiClass finalPsiClass = psiClass;
             WriteCommandAction.runWriteCommandAction(psiFile.getProject(), () -> {
                 SwaggerApiControllerProcessor swaggerApiControllerProcessor = ProcessorHolder.getSwaggerApiControllerProcessor();

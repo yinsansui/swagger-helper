@@ -33,9 +33,26 @@ public class PsiElementUtil {
         importList.add(elementFactory.createImportStatement(waiteImportClass));
     }
 
-    public static PsiAnnotation getAnnotation(PsiModifierListOwner psiClass, String annotationName) {
-        Map<String, PsiAnnotation> psiAnnotationMap = Arrays.stream(psiClass.getAnnotations()).collect(Collectors.toMap(PsiAnnotation::getQualifiedName, (psiAnnotation) -> psiAnnotation));
-        return psiAnnotationMap.get(annotationName);
+    /**
+     * 获取指定的注解
+     *
+     * @param psiModifierListOwner PsiClass 或者 PsiMethod
+     * @param fullQualifiedName    注解的全类名
+     * @return 注解
+     */
+    public static PsiAnnotation getAnnotation(PsiModifierListOwner psiModifierListOwner, String fullQualifiedName) {
+        return psiModifierListOwner == null ? null : psiModifierListOwner.getAnnotation(fullQualifiedName);
+    }
+
+    /**
+     * 是否包含指定注解
+     *
+     * @param psiModifierListOwner PsiClass 或者 PsiMethod
+     * @param fullQualifiedName    注解的全类名
+     * @return 是否包含
+     */
+    public static boolean hasAnnotation(PsiModifierListOwner psiModifierListOwner, String fullQualifiedName) {
+        return psiModifierListOwner != null && psiModifierListOwner.hasAnnotation(fullQualifiedName);
     }
 
     public static boolean isPipeline(PsiCallExpression callExpression) {
@@ -63,7 +80,13 @@ public class PsiElementUtil {
         return false;
     }
 
-    public static PsiClass getPsiCLass(PsiElement element) {
+    /**
+     * 一直向上查找直到查找到第一个 PsiClass
+     *
+     * @param element 元素
+     * @return 查找到的第一个 PsiClass
+     */
+    public static PsiClass lookupPsiClass(PsiElement element) {
         if (element instanceof PsiClass) {
             return (PsiClass) element;
         }
@@ -74,7 +97,13 @@ public class PsiElementUtil {
         return (PsiClass) psiClass;
     }
 
-    public static PsiMethod getPsiMethod(PsiElement element) {
+    /**
+     * 向上查找直到查找第一个 PsiMethod
+     *
+     * @param element 元素
+     * @return 查找到的第一个 PsiMethod
+     */
+    public static PsiMethod lookupPsiMethod(PsiElement element) {
         if (element instanceof PsiMethod) {
             return (PsiMethod) element;
         }

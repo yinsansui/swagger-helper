@@ -17,11 +17,35 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class SwaggerApiModelProcessor implements ClassSupportable {
+
     @Override
     public boolean support(PsiClass psiClass) {
-        Set<String> annotationName = Arrays.stream(psiClass.getAnnotations()).map(PsiAnnotation::getQualifiedName).collect(Collectors.toSet());
-        return !psiClass.isEnum() && !psiClass.isInterface() && !annotationName.contains(SpringMvcAnnotations.SERVICE_ANNOTATION_NAME) && !annotationName.contains(SpringMvcAnnotations.COMPONENT_ANNOTATION_NAME) && !annotationName.contains(SpringMvcAnnotations.CONFIGURATION_ANNOTATION_NAME) && !annotationName.contains(SpringMvcAnnotations.CONTROLLER_ANNOTATION_NAME) && !annotationName.contains(SpringMvcAnnotations.REST_CONTROLLER_ANNOTATION_NAME);
+        return isApiModel(psiClass);
+    }
 
+    /**
+     * 判断一个类是否是 Pojo 类
+     *
+     * @param psiClass 类
+     * @return 是否是 pojo
+     */
+    private boolean isApiModel(PsiClass psiClass) {
+        if (psiClass == null) {
+            return false;
+        }
+
+        // 不能是枚举和接口
+        if (psiClass.isEnum() || psiClass.isInterface()) {
+            return false;
+        }
+
+        // 如果声明为 Spring Bean 则也不会是 ApiModel
+        for (PsiAnnotation annotation : psiClass.getAnnotations()) {
+            if (SpringMvcAnnotations.WITH_COMPONENT_ANNOTATIONS.contains(annotation.getQualifiedName())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

@@ -44,23 +44,25 @@ public class SwaggerApiMethodProcessor implements MethodSupportable {
 
     @Override
     public boolean support(PsiClass psiClass, PsiMethod psiMethod) {
-        if (PsiElementUtil.getAnnotation(psiClass, REST_CONTROLLER_ANNOTATION_NAME) != null || PsiElementUtil.getAnnotation(psiClass, CONTROLLER_ANNOTATION_NAME) != null) {
-            PsiAnnotation[] annotations = psiMethod.getModifierList().getAnnotations();
-            Set<String> annotationNames = Arrays.stream(annotations).map(PsiAnnotation::getQualifiedName).collect(Collectors.toSet());
-            annotationNames.retainAll(this.interestingAnnotation);
-            if (annotationNames.size() == 1) {
-                PsiAnnotation psiAnnotation = psiMethod.getModifierList().findAnnotation(annotationNames.iterator().next());
-                if (REQUEST_MAPPING_ANNOTATION_NAME.equals(psiAnnotation.getQualifiedName())) {
-                    RequestMappingEntity requestMapping = (RequestMappingEntity) ParserHolder.getAnnotationProcessor(REQUEST_MAPPING_ANNOTATION_NAME).parse(psiAnnotation);
-                    return Arrays.stream(requestMapping.getMethod()).collect(Collectors.toSet()).size() == 1;
-                }
-            } else {
-                return false;
+        if (!PsiElementUtil.hasAnnotation(psiClass, REST_CONTROLLER_ANNOTATION_NAME) && !PsiElementUtil.hasAnnotation(psiClass, CONTROLLER_ANNOTATION_NAME)) {
+            // 只少 RestController 和 Controller 任意一个注解
+            return false;
+        }
+
+        // 好奇这里为什么一定要限制只能声明一种 HTTP METHOD
+        PsiAnnotation[] annotations = psiMethod.getModifierList().getAnnotations();
+        Set<String> annotationNames = Arrays.stream(annotations).map(PsiAnnotation::getQualifiedName).collect(Collectors.toSet());
+        annotationNames.retainAll(this.interestingAnnotation);
+        if (annotationNames.size() == 1) {
+            PsiAnnotation psiAnnotation = psiMethod.getModifierList().findAnnotation(annotationNames.iterator().next());
+            if (REQUEST_MAPPING_ANNOTATION_NAME.equals(psiAnnotation.getQualifiedName())) {
+                RequestMappingEntity requestMapping = (RequestMappingEntity) ParserHolder.getAnnotationProcessor(REQUEST_MAPPING_ANNOTATION_NAME).parse(psiAnnotation);
+                return Arrays.stream(requestMapping.getMethod()).collect(Collectors.toSet()).size() == 1;
             }
-            return true;
         } else {
             return false;
         }
+        return true;
     }
 
     public void process(PsiMethod psiMethod) {

@@ -20,7 +20,9 @@ public class SwaggerApiControllerProcessor implements ClassSupportable {
         if (psiClass == null) {
             return false;
         }
-        return PsiElementUtil.getAnnotation(psiClass, SpringMvcAnnotations.REST_CONTROLLER_ANNOTATION_NAME) != null || PsiElementUtil.getAnnotation(psiClass, SpringMvcAnnotations.CONTROLLER_ANNOTATION_NAME) != null;
+        // 包含 RestController 或者 Controller 任何一个注解就支持
+        return PsiElementUtil.hasAnnotation(psiClass, SpringMvcAnnotations.REST_CONTROLLER_ANNOTATION_NAME) ||
+                PsiElementUtil.hasAnnotation(psiClass, SpringMvcAnnotations.CONTROLLER_ANNOTATION_NAME);
     }
 
     @Override
